@@ -1,97 +1,630 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import AnomalyAlert from './AnomalyAlert';
-import { MomentumScore, AnomalyAlert as Alert, ProjectConfig } from '@/types/agent';
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Github,
+  Twitter,
+  Activity,
+  Users,
+  AlertTriangle,
+  Cpu,
+  Wifi,
+  Shield,
+  Target,
+  Layers,
+  Rocket,
+  Brain,
+  Atom,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ParticleSystem } from "./ParticleSystem"
+import { HolographicDataCube } from "./DataCube"
+import { AudioVisualizer } from "./AudiVisualizer"
+import { MorphingCard } from "./MorphingCard"
+import { GestureInterface } from "./GestureInterface"
+import type { MomentumScore, AnomalyAlert as AlertType, ProjectConfig, TimeSeriesAllPoint } from "@/types/agent"
+import { MomentumTimeSeries } from "./MomentumTimeSeries"
+import { time } from "console"
 
 const DEFAULT_PROJECT: ProjectConfig = {
-  name: 'Lens Protocol',
-  githubRepo: 'https://github.com/RocketChat/Rocket.Chat',
-  twitterHandle: 'raseshGaut_BTC',
-  contractAddress: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
+  name: "Lens Protocol",
+  githubRepo: "https://github.com/RocketChat/Rocket.Chat",
+  twitterHandle: "raseshGaut_BTC",
+  contractAddress: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+  tokenSymbol: "LENS",
   discord: {
-    serverId: '1381348107551379557',
-    channelId: '1381348108453286063'
-  }
-};
+    serverId: "1381348107551379557",
+    channelId: "1381348108453286063",
+  },
+}
 
-export default function Dashboard() {
-  const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState<MomentumScore | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [error, setError] = useState<string | null>(null);
+export default function UltimateDashboard() {
+  const [loading, setLoading] = useState(false)
+  const [score, setScore] = useState<MomentumScore | null>(null)
+  const [alerts, setAlerts] = useState<AlertType[]>([])
+  const [breakDown, setBreakDown] = useState<TimeSeriesAllPoint[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialized(true), 1000)
+    const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000)
+
+    return () => {
+      clearTimeout(timer)
+      clearInterval(timeInterval)
+    }
+  }, [])
 
   const handleRunAgent = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const res = await fetch('/api/agent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           project: DEFAULT_PROJECT,
           timeWindow: 48,
           updateInterval: 60,
-          anomalyThreshold: 2.5
-        })
-      });
+          anomalyThreshold: 2.5,
+        }),
+      })
 
-      const json = await res.json();
-      if (json.status === 'ok') {
-        setScore(json.score);
-        setAlerts(json.alerts);
+      const json = await res.json()
+      if (json.status === "ok") {
+        setBreakDown(json.breakdown)
+        setScore(json.score)
+        setAlerts(json.alerts)
       } else {
-        setError('Agent failed to respond correctly.');
+        setError("Neural network synchronization failed.")
       }
     } catch (err) {
-      console.error(err);
-      setError('Failed to contact the backend.');
+      console.error(err)
+      setError("Quantum entanglement disrupted. Recalibrating...")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-center">📊 Momentum Tracker Agent</h1>
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Particle System Background */}
+      <ParticleSystem />
 
-      <div className="flex justify-center">
-        <button
-          onClick={handleRunAgent}
-          disabled={loading}
-          className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {loading ? 'Analyzing...' : 'Run Momentum Agent'}
-        </button>
-      </div>
+      {/* Dynamic Background Layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(0,255,255,0.1),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.1),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(236,72,153,0.05),transparent_50%)]" />
 
-      {error && (
-        <div className="text-red-500 text-center">{error}</div>
-      )}
+      {/* Animated Grid */}
+      <motion.div
+        className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"
+        animate={{
+          backgroundPosition: ["0px 0px", "50px 50px"],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "linear",
+        }}
+      />
 
-      {score && (
-        <div className="p-4 bg-gray-900 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">🔥 Current Momentum Score</h2>
-          <ul className="grid grid-cols-2 gap-3">
-            <li><strong>Overall:</strong> {score.overall.toFixed(2)}</li>
-            <li><strong>GitHub:</strong> {score.github.toFixed(2)}</li>
-            <li><strong>Social:</strong> {score.social.toFixed(2)}</li>
-            <li><strong>Onchain:</strong> {score.onchain.toFixed(2)}</li>
-            <li><strong>Community:</strong> {score.community.toFixed(2)}</li>
-            <li><strong>Trend:</strong> <span className="capitalize">{score.trend}</span></li>
-            <li><strong>Confidence:</strong> {(score.confidence * 100).toFixed(1)}%</li>
-          </ul>
+      <GestureInterface>
+        <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+          {/* Animated Header */}
+          <AnimatePresence>
+            {isInitialized && (
+              <motion.div
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="text-center mb-12"
+              >
+                <div className="flex items-center justify-center mb-8">
+                  <motion.div
+                    className="relative"
+                    animate={{
+                      rotateY: [0, 360],
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full blur-2xl opacity-50 animate-pulse" />
+                    <div className="relative p-6 bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-600 rounded-full">
+                      <Brain className="h-16 w-16 text-white" />
+                    </div>
+                  </motion.div>
+                </div>
+
+                <motion.h1
+                  className="text-8xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-6 font-mono"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "linear",
+                  }}
+                >
+                  MOMENTUM.AI
+                </motion.h1>
+
+                <motion.p
+                  className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 1 }}
+                >
+                  Next-Generation Web3 Intelligence • Quantum Signal Processing • Neural Momentum Analysis
+                </motion.p>
+
+                {/* Real-time Status Bar */}
+                <motion.div
+                  className="flex items-center justify-center space-x-8 text-sm font-mono"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1, duration: 1 }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                    <span className="text-green-400">NEURAL LINK ACTIVE</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Wifi className="h-4 w-4 text-cyan-400" />
+                    <span className="text-cyan-400">QUANTUM SYNC</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Atom className="h-4 w-4 text-purple-400 animate-spin" />
+                    <span className="text-purple-400">{currentTime.toLocaleTimeString()}</span>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Project Command Center */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="mb-12"
+          >
+            <Card className="bg-black/60 backdrop-blur-md border border-cyan-500/30 shadow-2xl overflow-hidden">
+              <motion.div
+                className="h-1 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
+              />
+              <CardHeader className="border-b border-cyan-500/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <motion.div
+                      className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-500/30"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    >
+                      <Target className="h-8 w-8 text-purple-400" />
+                    </motion.div>
+                    <div>
+                      <CardTitle className="text-3xl text-white font-mono">{DEFAULT_PROJECT.name}</CardTitle>
+                      <p className="text-gray-400 text-lg">TARGET ACQUIRED • NEURAL ANALYSIS READY</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-3">
+                    <Badge variant="outline" className="border-green-500/50 text-green-400 bg-green-500/10 px-4 py-2">
+                      <Shield className="h-4 w-4 mr-2" />
+                      SECURE
+                    </Badge>
+                    <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 bg-cyan-500/10 px-4 py-2">
+                      <Activity className="h-4 w-4 mr-2" />
+                      ACTIVE
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {[
+                    { icon: Github, label: "REPOSITORY", value: "RocketChat/Rocket.Chat", color: "text-gray-400" },
+                    {
+                      icon: Twitter,
+                      label: "SOCIAL HANDLE",
+                      value: `@${DEFAULT_PROJECT.twitterHandle}`,
+                      color: "text-blue-400",
+                    },
+                    {
+                      icon: Layers,
+                      label: "CONTRACT",
+                      value: `${DEFAULT_PROJECT.contractAddress?.slice(0, 8)}...${DEFAULT_PROJECT.contractAddress?.slice(-6)}`,
+                      color: "text-green-400",
+                    },
+                    { icon: Cpu, label: "TOKEN", value: DEFAULT_PROJECT.tokenSymbol, color: "text-purple-400" },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex items-center space-x-4"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index, duration: 0.5 }}
+                    >
+                      <item.icon className={`h-6 w-6 ${item.color}`} />
+                      <div>
+                        <p className="text-sm text-gray-400 font-mono">{item.label}</p>
+                        <p className="text-white font-medium font-mono">{item.value}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Ultimate Action Button */}
+          <motion.div
+            className="flex justify-center mb-12"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRunAgent}
+                disabled={loading}
+                size="lg"
+                className="relative bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 hover:from-cyan-700 hover:via-purple-700 hover:to-pink-700 text-white px-16 py-6 rounded-2xl shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 font-mono text-xl"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 rounded-2xl"
+                  animate={{
+                    opacity: loading ? [0.3, 0.7, 0.3] : 0.3,
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: loading ? Number.POSITIVE_INFINITY : 0,
+                  }}
+                />
+                {loading ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                    >
+                      <Brain className="h-6 w-6 mr-4" />
+                    </motion.div>
+                    NEURAL PROCESSING...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-6 w-6 mr-4" />
+                    INITIATE QUANTUM SCAN
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Loading Experience */}
+          <AnimatePresence>
+            {loading && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="mb-12"
+              >
+                <Card className="bg-black/80 backdrop-blur-md border border-cyan-500/30 shadow-2xl">
+                  <CardContent className="p-12">
+                    <div className="flex flex-col items-center justify-center space-y-8">
+                      <motion.div
+                        className="relative"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                      >
+                        <div className="w-32 h-32 border-4 border-cyan-500/30 rounded-full">
+                          <div className="absolute top-0 left-0 w-32 h-32 border-4 border-transparent border-t-cyan-400 rounded-full animate-spin" />
+                          <div
+                            className="absolute top-2 left-2 w-28 h-28 border-4 border-transparent border-t-purple-400 rounded-full animate-spin"
+                            style={{ animationDirection: "reverse" }}
+                          />
+                          <div className="absolute top-4 left-4 w-24 h-24 border-4 border-transparent border-t-pink-400 rounded-full animate-spin" />
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Brain className="h-12 w-12 text-cyan-400 animate-pulse" />
+                        </div>
+                      </motion.div>
+
+                      <div className="text-center">
+                        <motion.p
+                          className="text-3xl font-bold text-cyan-400 font-mono mb-4"
+                          animate={{ opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                        >
+                          QUANTUM NEURAL ANALYSIS
+                        </motion.p>
+                        <p className="text-gray-400 text-lg mb-6">
+                          Scanning GitHub • Twitter • Onchain • Community Signals
+                        </p>
+
+                        <div className="flex justify-center space-x-3 mb-8">
+                          {[...Array(7)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="w-3 h-3 bg-cyan-400 rounded-full"
+                              animate={{
+                                scale: [1, 1.5, 1],
+                                opacity: [0.3, 1, 0.3],
+                              }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Number.POSITIVE_INFINITY,
+                                delay: i * 0.2,
+                              }}
+                            />
+                          ))}
+                        </div>
+
+                        <AudioVisualizer />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Results Dashboard */}
+          <AnimatePresence>
+            {score && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                className="space-y-12"
+              >
+                {/* Holographic Score Display */}
+                <Card className="bg-black/80 backdrop-blur-md border border-cyan-500/30 shadow-2xl overflow-hidden">
+                  <motion.div
+                    className="h-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400"
+                    animate={{
+                      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
+                  />
+                  <CardContent className="p-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                      <div className="text-center lg:text-left">
+                        <motion.h2
+                          className="text-4xl font-bold text-white mb-6 font-mono"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          MOMENTUM QUANTUM STATE
+                        </motion.h2>
+
+                        <motion.div
+                          className="text-9xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 font-mono"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5, duration: 1, type: "spring" }}
+                        >
+                          {score.overall.toFixed(1)}
+                        </motion.div>
+
+                        <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                          <Badge
+                            variant={
+                              score.trend === "rising"
+                                ? "default"
+                                : score.trend === "falling"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                            className="text-lg px-6 py-3 font-mono"
+                          >
+                            {score.trend === "rising" ? "🚀" : score.trend === "falling" ? "📉" : "⚡"}{" "}
+                            {score.trend.toUpperCase()}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            className="text-lg px-6 py-3 border-cyan-500/50 text-cyan-400 bg-cyan-500/10 font-mono"
+                          >
+                            {(score.confidence * 100).toFixed(0)}% CONFIDENCE
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <HolographicDataCube data={score} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Morphing Metric Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {[
+                    {
+                      title: "GitHub Velocity",
+                      value: score.github,
+                      icon: <Github className="h-8 w-8 text-gray-300" />,
+                      color: "from-gray-600 to-gray-800",
+                      content: (
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Stars</span>
+                            <span className="text-white">42.8K</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Commits</span>
+                            <span className="text-white">100</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Velocity</span>
+                            <span className="text-white">3.3/day</span>
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: "Social Momentum",
+                      value: score.social,
+                      icon: <Twitter className="h-8 w-8 text-blue-400" />,
+                      color: "from-blue-600 to-purple-600",
+                      content: (
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Mentions</span>
+                            <span className="text-white">20</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Engagement</span>
+                            <span className="text-white">180</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Sentiment</span>
+                            <span className="text-green-400">+0.1</span>
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: "Onchain Activity",
+                      value: score.onchain,
+                      icon: <Activity className="h-8 w-8 text-green-400" />,
+                      color: "from-green-600 to-emerald-600",
+                      content: (
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Transactions</span>
+                            <span className="text-white">1K</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Volume</span>
+                            <span className="text-white">$85K</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Holders</span>
+                            <span className="text-white">480</span>
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: "Community Power",
+                      value: score.community,
+                      icon: <Users className="h-8 w-8 text-purple-400" />,
+                      color: "from-purple-600 to-pink-600",
+                      content: (
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Discord</span>
+                            <span className="text-white">2 msgs</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Reddit</span>
+                            <span className="text-white">0 posts</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Medium</span>
+                            <span className="text-white">0 posts</span>
+                          </div>
+                        </div>
+                      ),
+                    },
+                  ].map((metric, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index, duration: 0.5 }}
+                    >
+                      <MorphingCard {...metric}>{metric.content}</MorphingCard>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <MomentumTimeSeries data={breakDown}/>
+
+          {/* Anomaly Alerts */}
+          <AnimatePresence>
+            {alerts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="mt-12"
+              >
+                <Card className="bg-black/80 backdrop-blur-md border border-red-500/30 shadow-2xl">
+                  <CardHeader className="border-b border-red-500/20">
+                    <div className="flex items-center space-x-4">
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY }}
+                      >
+                        <AlertTriangle className="h-8 w-8 text-red-400" />
+                      </motion.div>
+                      <CardTitle className="text-2xl text-white font-mono">QUANTUM ANOMALIES DETECTED</CardTitle>
+                      <Badge variant="destructive" className="font-mono text-lg px-4 py-2">
+                        {alerts.length} CRITICAL ALERTS
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-8 space-y-6">
+                    {alerts.map((alert, index) => (
+                      <motion.div
+                        key={alert.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                        className="p-6 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm"
+                      >
+                        <div className="flex items-start space-x-4">
+                          <AlertTriangle className="h-6 w-6 text-red-400 mt-1" />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-3">
+                              <span className="font-bold text-white font-mono text-lg">{alert.metric}</span>
+                              <Badge
+                                variant={alert.severity === "high" ? "destructive" : "secondary"}
+                                className="font-mono"
+                              >
+                                {alert.severity.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <p className="text-gray-300 text-lg">{alert.description}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      )}
-
-      {alerts.length > 0 && (
-        <div className="bg-red-50 p-4 rounded-lg shadow space-y-2">
-          <h2 className="text-xl font-semibold text-red-700">🚨 Anomalies Detected</h2>
-          {alerts.map(alert => (
-            <AnomalyAlert key={alert.id} alert={alert} />
-          ))}
-        </div>
-      )}
+      </GestureInterface>
     </div>
-  );
+  )
 }

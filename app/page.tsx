@@ -2,7 +2,7 @@ import Dashboard from './components/Dashboard';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="dark">
       <Dashboard />
     </main>
   );

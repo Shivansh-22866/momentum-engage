@@ -67,7 +67,7 @@ export class TwitterScraper {
 
       await page.waitForFunction(
         () => !!document.querySelector('[data-testid="tweet"]'),
-        { timeout: 30000 }
+        { timeout: 3000 }
       );
 
       let scrollCount = 0;

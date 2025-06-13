@@ -1,4 +1,4 @@
-import { TimeSeriesPoint, MomentumData, MomentumScore } from '@/types/agent';
+import { TimeSeriesPoint, MomentumData, MomentumScore, TimeSeriesAllPoint } from '@/types/agent';
 import { weightedAverage, calculateTrend, exponentialMovingAverage } from '@/lib/utils';
 
 export class TimeSeriesAnalyzer {
@@ -267,4 +267,25 @@ export class TimeSeriesAnalyzer {
   getWeights() {
     return { ...this.weights };
   }
+
+  /**
+ * Returns federated time-series breakdown for the stacked area chart.
+ * Each point contains timestamp + 4 momentum components.
+ */
+getTimeSeriesBreakdown(window: number = 48): TimeSeriesAllPoint[] {
+  const endTime = Date.now();
+  const startTime = endTime - window * 60 * 60 * 1000; // past N hours
+
+  return this.data
+    .filter((d) => d.timestamp >= startTime)
+    .map((d) => ({
+      timestamp: d.timestamp,
+      github: parseFloat((this.calculateGitHubScore(d.github) * 100).toFixed(2)),
+      social: parseFloat((this.calculateSocialScore(d.twitter) * 100).toFixed(2)),
+      onchain: parseFloat((this.calculateOnchainScore(d.onchain) * 100).toFixed(2)),
+      community: parseFloat((this.calculateCommunityScore(d.communityMentions, d.interactionPatterns) * 100).toFixed(2)),
+    }));
+}
+
+
 }

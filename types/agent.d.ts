@@ -61,6 +61,15 @@ export interface TimeSeriesPoint {
   metric: string;
 }
 
+export interface TimeSeriesAllPoint {
+  timestamp: number;
+  github: number;
+  social: number;
+  onchain: number;
+  community: number;
+}
+
+
 export interface AnomalyAlert {
   id: string;
   timestamp: number;

@@ -3,7 +3,8 @@ import {
   MomentumData,
   AnomalyAlert,
   TimeSeriesPoint,
-  AgentContext
+  AgentContext,
+  TimeSeriesAllPoint
 } from '@/types/agent';
 import { fetchMomentumData } from './tools';
 import { TimeSeriesAnalyzer } from '@/lib/scoring/timeSeries';
@@ -20,7 +21,7 @@ export async function runMomentumAgent(
   data: MomentumData;
   alerts: AnomalyAlert[];
   timeline: TimeSeriesPoint[];
-
+  breakdown: TimeSeriesAllPoint[];
 }> {
   const projectId =
     (context.project as any).id || // if `id` exists
@@ -36,7 +37,8 @@ export async function runMomentumAgent(
       score: getDefaultScore(),
       data: getDefaultData(),
       alerts: [],
-      timeline: []
+      timeline: [],
+      breakdown: []
     };
   }
 
@@ -62,6 +64,7 @@ export async function runMomentumAgent(
   const alerts = [...spikeAlerts, ...patternAlerts];
 
   const timeline = analyzer.getTimeSeriesData('overall', context.timeWindow);
+  const breakdown = analyzer.getTimeSeriesBreakdown(context.timeWindow);
 
   console.log("DATA AND ALERTS SENT FOR NARRATIVE: ", data, alerts)
 
@@ -75,7 +78,8 @@ export async function runMomentumAgent(
     score: { ...score, confidence: aiInsights.confidence },
     data,
     alerts,
-    timeline
+    timeline,
+    breakdown
   };
 }
 
