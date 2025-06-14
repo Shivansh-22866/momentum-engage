@@ -68,7 +68,6 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
           <Area
             type="monotone"
             dataKey="github"
-            stackId="1"
             stroke="#00ffff"
             fill="url(#githubGradient)"
             strokeWidth={2}
@@ -76,7 +75,6 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
           <Area
             type="monotone"
             dataKey="social"
-            stackId="1"
             stroke="#8b5cf6"
             fill="url(#socialGradient)"
             strokeWidth={2}
@@ -84,7 +82,6 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
           <Area
             type="monotone"
             dataKey="onchain"
-            stackId="1"
             stroke="#10b981"
             fill="url(#onchainGradient)"
             strokeWidth={2}
@@ -92,7 +89,6 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
           <Area
             type="monotone"
             dataKey="community"
-            stackId="1"
             stroke="#f59e0b"
             fill="url(#communityGradient)"
             strokeWidth={2}

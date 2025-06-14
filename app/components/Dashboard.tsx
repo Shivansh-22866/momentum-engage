@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Github,
   Twitter,
@@ -16,80 +16,99 @@ import {
   Rocket,
   Brain,
   Atom,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ParticleSystem } from "./ParticleSystem"
-import { HolographicDataCube } from "./DataCube"
-import { AudioVisualizer } from "./AudiVisualizer"
-import { MorphingCard } from "./MorphingCard"
-import { GestureInterface } from "./GestureInterface"
-import type { MomentumScore, AnomalyAlert as AlertType, ProjectConfig, TimeSeriesAllPoint } from "@/types/agent"
-import { MomentumTimeSeries } from "./MomentumTimeSeries"
-import { time } from "console"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ParticleSystem } from "./ParticleSystem";
+import { HolographicDataCube } from "./DataCube";
+import { AudioVisualizer } from "./AudiVisualizer";
+import { MorphingCard } from "./MorphingCard";
+import { GestureInterface } from "./GestureInterface";
+import type {
+  MomentumScore,
+  AnomalyAlert as AlertType,
+  ProjectConfig,
+  TimeSeriesAllPoint,
+  AIinsights,
+} from "@/types/agent";
+import { MomentumTimeSeries } from "./MomentumTimeSeries";
+import { time } from "console";
+import { AIInsightsDisplay } from "./AIInsightsDisplay";
 
-const DEFAULT_PROJECT: ProjectConfig = {
-  name: "Lens Protocol",
-  githubRepo: "https://github.com/RocketChat/Rocket.Chat",
-  twitterHandle: "raseshGaut_BTC",
-  contractAddress: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
-  tokenSymbol: "LENS",
-  discord: {
-    serverId: "1381348107551379557",
-    channelId: "1381348108453286063",
-  },
-}
-
-export default function UltimateDashboard() {
-  const [loading, setLoading] = useState(false)
-  const [score, setScore] = useState<MomentumScore | null>(null)
-  const [alerts, setAlerts] = useState<AlertType[]>([])
-  const [breakDown, setBreakDown] = useState<TimeSeriesAllPoint[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
+export default function Dashboard() {
+  const [loading, setLoading] = useState(false);
+  const [score, setScore] = useState<MomentumScore | null>(null);
+  const [alerts, setAlerts] = useState<AlertType[]>([]);
+  const [breakDown, setBreakDown] = useState<TimeSeriesAllPoint[]>([]);
+  const [insights, setInsights] = useState<AIinsights>({
+    summary: "",
+    outlook: "",
+    keySignals: [],
+    riskLevel: "",
+    confidence: 0,
+    reason: "",
+    review: "",
+  });
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [projectConfig, setProjectConfig] = useState<ProjectConfig>({
+    name: "Lens Protocol",
+    githubRepo: "https://github.com/RocketChat/Rocket.Chat",
+    twitterHandle: "raseshGaut_BTC",
+    contractAddress: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+    tokenSymbol: "LENS",
+    discord: {
+      serverId: "1381348107551379557",
+      channelId: "1381348108453286063",
+    },
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialized(true), 1000)
-    const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000)
+    const timer = setTimeout(() => setIsInitialized(true), 1000);
+    const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
     return () => {
-      clearTimeout(timer)
-      clearInterval(timeInterval)
-    }
-  }, [])
+      clearTimeout(timer);
+      clearInterval(timeInterval);
+    };
+  }, []);
 
   const handleRunAgent = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          project: DEFAULT_PROJECT,
+          project: projectConfig,
           timeWindow: 48,
           updateInterval: 60,
           anomalyThreshold: 2.5,
         }),
-      })
+      });
 
-      const json = await res.json()
+      const json = await res.json();
       if (json.status === "ok") {
-        setBreakDown(json.breakdown)
-        setScore(json.score)
-        setAlerts(json.alerts)
+        console.log(json);
+        setBreakDown(json.breakdown);
+        setScore(json.score);
+        setAlerts(json.alerts);
+        setInsights(json.aiInput);
+        console.log("AI INSIGHTS", insights);
       } else {
-        setError("Neural network synchronization failed.")
+        setError("Neural network synchronization failed.");
       }
     } catch (err) {
-      console.error(err)
-      setError("Quantum entanglement disrupted. Recalibrating...")
+      console.error(err);
+      setError("Quantum entanglement disrupted. Recalibrating...");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -165,7 +184,8 @@ export default function UltimateDashboard() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5, duration: 1 }}
                 >
-                  Next-Generation Web3 Intelligence • Quantum Signal Processing • Neural Momentum Analysis
+                  Next-Generation Web3 Intelligence • Quantum Signal Processing
+                  • Neural Momentum Analysis
                 </motion.p>
 
                 {/* Real-time Status Bar */}
@@ -185,7 +205,9 @@ export default function UltimateDashboard() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Atom className="h-4 w-4 text-purple-400 animate-spin" />
-                    <span className="text-purple-400">{currentTime.toLocaleTimeString()}</span>
+                    <span className="text-purple-400">
+                      {currentTime.toLocaleTimeString()}
+                    </span>
                   </div>
                 </motion.div>
               </motion.div>
@@ -221,16 +243,26 @@ export default function UltimateDashboard() {
                       <Target className="h-8 w-8 text-purple-400" />
                     </motion.div>
                     <div>
-                      <CardTitle className="text-3xl text-white font-mono">{DEFAULT_PROJECT.name}</CardTitle>
-                      <p className="text-gray-400 text-lg">TARGET ACQUIRED • NEURAL ANALYSIS READY</p>
+                      <CardTitle className="text-3xl text-white font-mono">
+                        {projectConfig.name}
+                      </CardTitle>
+                      <p className="text-gray-400 text-lg">
+                        TARGET ACQUIRED • NEURAL ANALYSIS READY
+                      </p>
                     </div>
                   </div>
                   <div className="flex space-x-3">
-                    <Badge variant="outline" className="border-green-500/50 text-green-400 bg-green-500/10 px-4 py-2">
+                    <Badge
+                      variant="outline"
+                      className="border-green-500/50 text-green-400 bg-green-500/10 px-4 py-2"
+                    >
                       <Shield className="h-4 w-4 mr-2" />
                       SECURE
                     </Badge>
-                    <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 bg-cyan-500/10 px-4 py-2">
+                    <Badge
+                      variant="outline"
+                      className="border-cyan-500/50 text-cyan-400 bg-cyan-500/10 px-4 py-2"
+                    >
                       <Activity className="h-4 w-4 mr-2" />
                       ACTIVE
                     </Badge>
@@ -240,32 +272,60 @@ export default function UltimateDashboard() {
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {[
-                    { icon: Github, label: "REPOSITORY", value: "RocketChat/Rocket.Chat", color: "text-gray-400" },
+                    {
+                      icon: Github,
+                      label: "REPOSITORY",
+                      field: "githubRepo",
+                      value: projectConfig.githubRepo,
+                      color: "text-gray-400",
+                    },
                     {
                       icon: Twitter,
                       label: "SOCIAL HANDLE",
-                      value: `@${DEFAULT_PROJECT.twitterHandle}`,
+                      field: "twitterHandle",
+                      value: projectConfig.twitterHandle,
                       color: "text-blue-400",
+                      prefix: "@",
                     },
                     {
                       icon: Layers,
                       label: "CONTRACT",
-                      value: `${DEFAULT_PROJECT.contractAddress?.slice(0, 8)}...${DEFAULT_PROJECT.contractAddress?.slice(-6)}`,
+                      field: "contractAddress",
+                      value: projectConfig.contractAddress,
                       color: "text-green-400",
                     },
-                    { icon: Cpu, label: "TOKEN", value: DEFAULT_PROJECT.tokenSymbol, color: "text-purple-400" },
+                    {
+                      icon: Cpu,
+                      label: "TOKEN",
+                      field: "tokenSymbol",
+                      value: projectConfig.tokenSymbol,
+                      color: "text-purple-400",
+                    },
                   ].map((item, index) => (
                     <motion.div
                       key={index}
-                      className="flex items-center space-x-4"
+                      className="flex items-start space-x-4"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index, duration: 0.5 }}
                     >
-                      <item.icon className={`h-6 w-6 ${item.color}`} />
-                      <div>
-                        <p className="text-sm text-gray-400 font-mono">{item.label}</p>
-                        <p className="text-white font-medium font-mono">{item.value}</p>
+                      <item.icon className={`h-6 w-6 mt-2 ${item.color}`} />
+                      <div className="w-full">
+                        <p className="text-sm text-gray-400 font-mono mb-1">
+                          {item.label}
+                        </p>
+                        <input
+                          type="text"
+                          value={item.value}
+                          onChange={(e) =>
+                            setProjectConfig((prev) => ({
+                              ...prev,
+                              [item.field]: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded text-white font-mono placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                          placeholder={item.label}
+                        />
                       </div>
                     </motion.div>
                   ))}
@@ -302,7 +362,11 @@ export default function UltimateDashboard() {
                   <>
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "linear",
+                      }}
                     >
                       <Brain className="h-6 w-6 mr-4" />
                     </motion.div>
@@ -333,7 +397,11 @@ export default function UltimateDashboard() {
                       <motion.div
                         className="relative"
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                        transition={{
+                          duration: 2,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: "linear",
+                        }}
                       >
                         <div className="w-32 h-32 border-4 border-cyan-500/30 rounded-full">
                           <div className="absolute top-0 left-0 w-32 h-32 border-4 border-transparent border-t-cyan-400 rounded-full animate-spin" />
@@ -352,12 +420,16 @@ export default function UltimateDashboard() {
                         <motion.p
                           className="text-3xl font-bold text-cyan-400 font-mono mb-4"
                           animate={{ opacity: [1, 0.5, 1] }}
-                          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Number.POSITIVE_INFINITY,
+                          }}
                         >
                           QUANTUM NEURAL ANALYSIS
                         </motion.p>
                         <p className="text-gray-400 text-lg mb-6">
-                          Scanning GitHub • Twitter • Onchain • Community Signals
+                          Scanning GitHub • Twitter • Onchain • Community
+                          Signals
                         </p>
 
                         <div className="flex justify-center space-x-3 mb-8">
@@ -383,6 +455,19 @@ export default function UltimateDashboard() {
                     </div>
                   </CardContent>
                 </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {(score || aiProcessing) && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                className="mb-12"
+              >
+                <AIInsightsDisplay insights={insights} isProcessing={aiProcessing} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -425,7 +510,11 @@ export default function UltimateDashboard() {
                           className="text-9xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 font-mono"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ delay: 0.5, duration: 1, type: "spring" }}
+                          transition={{
+                            delay: 0.5,
+                            duration: 1,
+                            type: "spring",
+                          }}
                         >
                           {score.overall.toFixed(1)}
                         </motion.div>
@@ -436,12 +525,16 @@ export default function UltimateDashboard() {
                               score.trend === "rising"
                                 ? "default"
                                 : score.trend === "falling"
-                                  ? "destructive"
-                                  : "secondary"
+                                ? "destructive"
+                                : "secondary"
                             }
                             className="text-lg px-6 py-3 font-mono"
                           >
-                            {score.trend === "rising" ? "🚀" : score.trend === "falling" ? "📉" : "⚡"}{" "}
+                            {score.trend === "rising"
+                              ? "🚀"
+                              : score.trend === "falling"
+                              ? "📉"
+                              : "⚡"}{" "}
                             {score.trend.toUpperCase()}
                           </Badge>
                           <Badge
@@ -562,11 +655,12 @@ export default function UltimateDashboard() {
                     </motion.div>
                   ))}
                 </div>
+                <div className="mt-12">
+                  <MomentumTimeSeries data={breakDown} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-
-          <MomentumTimeSeries data={breakDown}/>
 
           {/* Anomaly Alerts */}
           <AnimatePresence>
@@ -582,12 +676,20 @@ export default function UltimateDashboard() {
                     <div className="flex items-center space-x-4">
                       <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY }}
+                        transition={{
+                          duration: 0.5,
+                          repeat: Number.POSITIVE_INFINITY,
+                        }}
                       >
                         <AlertTriangle className="h-8 w-8 text-red-400" />
                       </motion.div>
-                      <CardTitle className="text-2xl text-white font-mono">QUANTUM ANOMALIES DETECTED</CardTitle>
-                      <Badge variant="destructive" className="font-mono text-lg px-4 py-2">
+                      <CardTitle className="text-2xl text-white font-mono">
+                        QUANTUM ANOMALIES DETECTED
+                      </CardTitle>
+                      <Badge
+                        variant="destructive"
+                        className="font-mono text-lg px-4 py-2"
+                      >
                         {alerts.length} CRITICAL ALERTS
                       </Badge>
                     </div>
@@ -605,15 +707,23 @@ export default function UltimateDashboard() {
                           <AlertTriangle className="h-6 w-6 text-red-400 mt-1" />
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-3">
-                              <span className="font-bold text-white font-mono text-lg">{alert.metric}</span>
+                              <span className="font-bold text-white font-mono text-lg">
+                                {alert.metric}
+                              </span>
                               <Badge
-                                variant={alert.severity === "high" ? "destructive" : "secondary"}
+                                variant={
+                                  alert.severity === "high"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
                                 className="font-mono"
                               >
                                 {alert.severity.toUpperCase()}
                               </Badge>
                             </div>
-                            <p className="text-gray-300 text-lg">{alert.description}</p>
+                            <p className="text-gray-300 text-lg">
+                              {alert.description}
+                            </p>
                           </div>
                         </div>
                       </motion.div>
@@ -626,5 +736,5 @@ export default function UltimateDashboard() {
         </div>
       </GestureInterface>
     </div>
-  )
+  );
 }

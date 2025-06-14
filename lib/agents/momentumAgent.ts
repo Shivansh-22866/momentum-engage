@@ -4,7 +4,8 @@ import {
   AnomalyAlert,
   TimeSeriesPoint,
   AgentContext,
-  TimeSeriesAllPoint
+  TimeSeriesAllPoint,
+  AIinsights
 } from '@/types/agent';
 import { fetchMomentumData } from './tools';
 import { TimeSeriesAnalyzer } from '@/lib/scoring/timeSeries';
@@ -22,6 +23,7 @@ export async function runMomentumAgent(
   alerts: AnomalyAlert[];
   timeline: TimeSeriesPoint[];
   breakdown: TimeSeriesAllPoint[];
+  aiInput: AIinsights
 }> {
   const projectId =
     (context.project as any).id || // if `id` exists
@@ -38,7 +40,16 @@ export async function runMomentumAgent(
       data: getDefaultData(),
       alerts: [],
       timeline: [],
-      breakdown: []
+      breakdown: [],
+      aiInput: {
+        summary: "",
+        confidence: 0,
+        outlook: "",
+        keySignals: [],
+        riskLevel: "",
+        reason: "",
+        review: ""
+      }
     };
   }
 
@@ -66,9 +77,11 @@ export async function runMomentumAgent(
   const timeline = analyzer.getTimeSeriesData('overall', context.timeWindow);
   const breakdown = analyzer.getTimeSeriesBreakdown(context.timeWindow);
 
+  console.log("BREAKDOWN: ", breakdown)
+
   console.log("DATA AND ALERTS SENT FOR NARRATIVE: ", data, alerts)
 
-  const narrativeInput = formatMomentumContext(data, alerts);
+  const narrativeInput = formatMomentumContext(data, alerts, breakdown);
   const aiInsights = await analyzeWithGroq(narrativeInput);
 
   console.log(aiInsights)
@@ -79,7 +92,8 @@ export async function runMomentumAgent(
     data,
     alerts,
     timeline,
-    breakdown
+    breakdown,
+    aiInput: aiInsights
   };
 }
 

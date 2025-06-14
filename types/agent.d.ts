@@ -99,3 +99,13 @@ export interface AgentContext {
   updateInterval: number; // minutes
   anomalyThreshold: number;
 }
+
+export interface AIinsights {
+  summary: string;
+  outlook: string;
+  keySignals: string[];
+  riskLevel: string;
+  confidence: number;
+  reason: string;
+  review: string;
+}

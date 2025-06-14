@@ -1,4 +1,4 @@
-import { MomentumData, AnomalyAlert } from "@/types/agent";
+import { MomentumData, AnomalyAlert, TimeSeriesAllPoint } from "@/types/agent";
 import { generateObject } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { z } from 'zod';
@@ -36,7 +36,7 @@ ${insights}
   return result.object;
 }
 
-export function formatMomentumContext(data: MomentumData, alerts: AnomalyAlert[] = []): string {
+export function formatMomentumContext(data: MomentumData, alerts: AnomalyAlert[] = [], breakdown: TimeSeriesAllPoint[]): string {
   const alertText = alerts.length > 0
     ? alerts.map(alert => `- [${alert.metric}] ${alert.description} (Value: ${alert.value}, Expected: ${alert.expectedRange.join(" - ")})`).join("\n")
     : 'No recent anomaly alerts.';
@@ -78,6 +78,9 @@ export function formatMomentumContext(data: MomentumData, alerts: AnomalyAlert[]
 - Liquidity: $${data.onchain.liquidity.toFixed(2)}
 - Holders: ${data.onchain.holders}
 - Transfer Count: ${data.onchain.transferCount}
+
+## Also this is the breakdown of the federated time series:
+${breakdown.map(d => `- ${new Date(d.timestamp).toLocaleString()}: ${d.github.toFixed(2)}% / ${d.social.toFixed(2)}% / ${d.onchain.toFixed(2)}% / ${d.community.toFixed(2)}%`).join("\n")}
 
 ## ⚠️ Recent Anomaly Alerts
 ${alertText}
