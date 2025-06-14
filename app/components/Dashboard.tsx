@@ -16,6 +16,8 @@ import {
   Rocket,
   Brain,
   Atom,
+  MessageSquare,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +35,6 @@ import type {
   AIinsights,
 } from "@/types/agent";
 import { MomentumTimeSeries } from "./MomentumTimeSeries";
-import { time } from "console";
 import { AIInsightsDisplay } from "./AIInsightsDisplay";
 
 export default function Dashboard() {
@@ -43,15 +44,31 @@ export default function Dashboard() {
   const [breakDown, setBreakDown] = useState<TimeSeriesAllPoint[]>([]);
   const [insights, setInsights] = useState<AIinsights>({
     summary: "",
-    outlook: "",
+    outlook: "neutral",
     keySignals: [],
-    riskLevel: "",
+    riskLevel: "medium",
     confidence: 0,
     reason: "",
     review: "",
+    narrative: "",
+    trendDelta: {
+      shortTerm: "stable",
+      longTerm: "stable",
+      velocity: 0,
+    },
+    signalAlignment: {
+      githubVsTwitter: "inconclusive",
+      communityVsOnchain: "inconclusive",
+    },
+    anomalyTrend: "",
+    relativePerformance: {
+      category: "",
+      rankPercentile: 0,
+      outperformingSignals: [],
+    },
   });
   const [aiProcessing, setAiProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [projectConfig, setProjectConfig] = useState<ProjectConfig>({
@@ -80,6 +97,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
+      setAiProcessing(true)
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,6 +112,7 @@ export default function Dashboard() {
       const json = await res.json();
       if (json.status === "ok") {
         console.log(json);
+        setAiProcessing(false)
         setBreakDown(json.breakdown);
         setScore(json.score);
         setAlerts(json.alerts);
@@ -175,8 +194,18 @@ export default function Dashboard() {
                     ease: "linear",
                   }}
                 >
-                  MOMENTUM.AI
+                  SCéAL.AI
                 </motion.h1>
+
+                <motion.p
+                  className="text-xl italic text-gray-300 max-w-4xl mx-auto leading-relaxed mb-6 font-serif"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 1 }}
+                >
+                  “An té a bhíonn siúlach, bíonn scéalach” — In Web3, the signal
+                  travels far to bring the story home.
+                </motion.p>
 
                 <motion.p
                   className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-6"
@@ -184,8 +213,8 @@ export default function Dashboard() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5, duration: 1 }}
                 >
-                  Next-Generation Web3 Intelligence • Quantum Signal Processing
-                  • Neural Momentum Analysis
+                  Momentum Forecasting • Signal Intelligence • Federated
+                  Foresight
                 </motion.p>
 
                 {/* Real-time Status Bar */}
@@ -329,6 +358,82 @@ export default function Dashboard() {
                       </div>
                     </motion.div>
                   ))}
+                  <motion.div
+                    className="flex items-start space-x-4 mx-auto"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * 4, duration: 0.5 }} // delay after 4th item
+                  >
+                    <MessageSquare className="h-6 w-6 mt-2 text-indigo-400" />
+                    <div className="w-full">
+                      <p className="text-sm text-gray-400 font-mono mb-1 flex justify-between items-center">
+                        DISCORD CHANNEL
+                        <span className="text-xs text-yellow-400 ml-2">
+                          Bot must be invited
+                        </span>
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="Paste Discord channel link..."
+                        className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded text-white font-mono placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) => {
+                          const input = e.target.value;
+                          const match = input.match(/channels\/(\d+)\/(\d+)/); // extract server + channel ID
+                          if (match) {
+                            const [_, serverId, channelId] = match;
+                            setProjectConfig((prev) => ({
+                              ...prev,
+                              discord: { serverId, channelId },
+                            }));
+                          } else {
+                            // Optionally reset or show error if input is cleared
+                            setProjectConfig((prev) => ({
+                              ...prev,
+                              discord: undefined,
+                            }));
+                          }
+                        }}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Example: https://discord.com/channels/
+                        <strong>SERVER_ID</strong>/<strong>CHANNEL_ID</strong>
+                      </p>
+                      <p className="text-xs text-yellow-500 mt-1">
+                        Make sure our bot has access to this channel. Invite
+                        link:{" "}
+                        <a
+                          href="https://discord.com/oauth2/authorize?client_id=1381346538961506524"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          Invite Bot
+                        </a>
+                      </p>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="flex items-start space-x-4 opacity-50 cursor-not-allowed left-20 relative"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * 5, duration: 0.5 }} // after existing inputs
+                  >
+                    <Zap className="h-6 w-6 mt-2 text-pink-400" />
+                    <div className="w-full">
+                      <p className="text-sm text-gray-400 font-mono mb-1">
+                        COMING SOON
+                      </p>
+                      <input
+                        type="text"
+                        value="Reddit, Medium, Telegram, Farcaster..."
+                        disabled
+                        className="w-full px-3 py-2 bg-black/30 border border-gray-700 rounded text-white font-mono placeholder-gray-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Future data streams will be supported soon
+                      </p>
+                    </div>
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>
@@ -467,7 +572,10 @@ export default function Dashboard() {
                 transition={{ duration: 1 }}
                 className="mb-12"
               >
-                <AIInsightsDisplay insights={insights} isProcessing={aiProcessing} />
+                <AIInsightsDisplay
+                  insights={insights}
+                  isProcessing={aiProcessing}
+                />
               </motion.div>
             )}
           </AnimatePresence>

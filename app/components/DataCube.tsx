@@ -59,7 +59,7 @@ export function HolographicDataCube({ data }: DataCubeProps) {
       })
 
       // Project to 2D
-      const projectedVertices = rotatedVertices.map(([x, y, z]) => [centerX + x, centerY + y])
+      const projectedVertices = rotatedVertices.map(([x, y]) => [centerX + x, centerY + y])
 
       // Draw cube edges with glow effect
       const edges = [

@@ -5,7 +5,7 @@ import { OnchainDataFetcher, isValidEthereumAddress } from '@/lib/data/onchain';
 
 export async function fetchMomentumData(
   project: ProjectConfig,
-  context: AgentContext
+  _context: AgentContext
 ): Promise<MomentumData> {
   const timestamp = Date.now();
 

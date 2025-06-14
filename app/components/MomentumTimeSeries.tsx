@@ -14,6 +14,13 @@ interface MomentumTimeSeriesProps {
   data: TimeSeriesData[]
 }
 
+interface CustomTooltipProps {
+  active: boolean;
+  payload: any[];
+  label: number;
+}
+
+
 export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString("en-US", {
@@ -22,7 +29,7 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
     })
   }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-black/90 border border-cyan-500/50 rounded-lg p-3 backdrop-blur-sm">
@@ -64,7 +71,7 @@ export function MomentumTimeSeries({ data }: MomentumTimeSeriesProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#333" opacity={0.3} />
           <XAxis dataKey="timestamp" tickFormatter={formatTime} stroke="#666" fontSize={10} />
           <YAxis stroke="#666" fontSize={10} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip active={false} payload={[]} label={0} />} />
           <Area
             type="monotone"
             dataKey="github"

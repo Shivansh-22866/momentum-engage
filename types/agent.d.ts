@@ -102,10 +102,26 @@ export interface AgentContext {
 
 export interface AIinsights {
   summary: string;
-  outlook: string;
+  outlook: 'bullish' | 'bearish' | 'neutral';
   keySignals: string[];
-  riskLevel: string;
-  confidence: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  confidence: number; // 0–1
   reason: string;
   review: string;
+  narrative: string;
+  trendDelta: {
+    shortTerm: string;   // e.g., 'rising', 'falling', 'stable'
+    longTerm: string;    // e.g., 'stable', 'declining'
+    velocity: number;    // Numeric representation of change speed
+  };
+  signalAlignment: {
+    githubVsTwitter: 'aligned' | 'diverging' | 'inconclusive';
+    communityVsOnchain: 'aligned' | 'diverging' | 'inconclusive';
+  };
+  anomalyTrend: string; // Summary of recent anomaly activity
+  relativePerformance: {
+    category: string;            // e.g., 'DeFi', 'L2', 'NFT'
+    rankPercentile: number;      // 0–100 scale
+    outperformingSignals: string[];
+  };
 }

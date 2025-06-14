@@ -37,7 +37,7 @@ export default function EnhancedAnomalyAlert({ alert }: { alert: AnomalyAlert })
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
             <span className="font-medium text-sm">{alert.metric}</span>
-            <Badge variant={getSeverityColor() as any} className="text-xs">
+            <Badge variant={getSeverityColor() as 'destructive' | 'default' | 'secondary'} className="text-xs">
               {alert.severity}
             </Badge>
           </div>

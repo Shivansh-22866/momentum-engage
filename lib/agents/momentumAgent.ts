@@ -44,11 +44,27 @@ export async function runMomentumAgent(
       aiInput: {
         summary: "",
         confidence: 0,
-        outlook: "",
+        outlook: "bearish",
         keySignals: [],
-        riskLevel: "",
+        riskLevel: "low",
         reason: "",
-        review: ""
+        review: "",
+        trendDelta: {
+          shortTerm: "stable",
+          longTerm: "stable",
+          velocity: 0,
+        },
+        signalAlignment: {
+          githubVsTwitter: "inconclusive",
+          communityVsOnchain: "inconclusive",
+        },
+        anomalyTrend: "",
+        relativePerformance: {
+          category: "",
+          rankPercentile: 0,
+          outperformingSignals: [],
+        },
+        narrative: ""
       }
     };
   }

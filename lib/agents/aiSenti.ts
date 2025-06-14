@@ -11,22 +11,51 @@ export async function analyzeWithGroq(insights: string) {
     riskLevel: z.enum(['low', 'medium', 'high']),
     confidence: z.number().min(0).max(1),
     reason: z.string(),
-    review: z.string()
+    review: z.string(),
+    narrative: z.string(),
+    trendDelta: z.object({
+      shortTerm: z.string(), // e.g., 'rising'
+      longTerm: z.string(),  // e.g., 'stable'
+      velocity: z.number()   // rate of change (arbitrary scale)
+    }),
+    signalAlignment: z.object({
+      githubVsTwitter: z.enum(['aligned', 'diverging', 'inconclusive']),
+      communityVsOnchain: z.enum(['aligned', 'diverging', 'inconclusive']),
+    }),
+    anomalyTrend: z.string(),
+    relativePerformance: z.object({
+      category: z.string(),
+      rankPercentile: z.number().min(0).max(100),
+      outperformingSignals: z.array(z.string())
+    })
   });
 
   const result = await generateObject({
     model: groq('llama3-8b-8192'),
     schema,
     prompt: `
-You are an expert Web3 momentum analyst. Given the multi-channel data and recent anomalies, return a structured JSON object with these fields:
+You are a Web3 intelligence analyst AI specialized in real-time signal processing. Given cross-domain input from GitHub, Twitter, Onchain data, community platforms, and anomalies, return the following structured fields:
 
-- summary: A concise overview of current project momentum.
-- outlook: 'bullish' | 'bearish' | 'neutral'
-- keySignals: array of key metric changes (e.g., spike in commits, drop in liquidity)
-- riskLevel: 'low' | 'medium' | 'high'
-- confidence: float from 0–1 representing your analytical certainty
-- reason: a multi-paragraph explanation combining GitHub, Twitter, Onchain, and Community data along with anomaly patterns.
-- review: go through all data streams and tell which one of them might be a weak point
+- **summary**: Brief high-level snapshot of project momentum.
+- **outlook**: One of 'bullish' | 'bearish' | 'neutral'.
+- **keySignals**: Major signal shifts or events (e.g., surge in transactions or drop in contributors).
+- **riskLevel**: Assess risk as 'low', 'medium', or 'high'.
+- **confidence**: A number between 0 and 1 that reflects certainty in your prediction.
+- **reason**: A clear explanation referencing relevant data streams. Highlight specific data points and changes (e.g., spike in commits, drop in sentiment).
+- **review**: Which channel is underperforming or creating uncertainty.
+- **narrative**: Describe the recent story arc of the project like a news brief, connecting data movements across time.
+- **trendDelta**:
+  - shortTerm: Describe short-term momentum direction (e.g., 'rising').
+  - longTerm: Describe long-term trend behavior (e.g., 'stable').
+  - velocity: Estimated speed of trend change.
+- **signalAlignment**:
+  - githubVsTwitter: Are social signals matching development signals?
+  - communityVsOnchain: Are users active and are transactions moving?
+- **anomalyTrend**: Summarize recent anomaly patterns across signals.
+- **relativePerformance**:
+  - category: Type of project (e.g., 'DeFi', 'NFT', 'L1').
+  - rankPercentile: Rank relative to similar projects (0–100).
+  - outperformingSignals: Signals where this project leads its peers.
 
 Data:
 ${insights}
@@ -79,13 +108,13 @@ export function formatMomentumContext(data: MomentumData, alerts: AnomalyAlert[]
 - Holders: ${data.onchain.holders}
 - Transfer Count: ${data.onchain.transferCount}
 
-## Also this is the breakdown of the federated time series:
-${breakdown.map(d => `- ${new Date(d.timestamp).toLocaleString()}: ${d.github.toFixed(2)}% / ${d.social.toFixed(2)}% / ${d.onchain.toFixed(2)}% / ${d.community.toFixed(2)}%`).join("\n")}
+## 🧭 Federated Time-Series Breakdown
+${breakdown.map(d => `- ${new Date(d.timestamp).toLocaleString()}: GitHub ${d.github.toFixed(2)}% • Social ${d.social.toFixed(2)}% • Onchain ${d.onchain.toFixed(2)}% • Community ${d.community.toFixed(2)}%`).join("\n")}
 
 ## ⚠️ Recent Anomaly Alerts
 ${alertText}
 
 ### Notes:
-Use this context to identify cross-signal convergence, detect abnormal movements, and predict momentum shifts.
+Use this context to understand trend direction, signal alignment, anomaly clusters, and cross-domain project health.
 `;
 }

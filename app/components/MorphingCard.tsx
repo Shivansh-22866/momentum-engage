@@ -19,7 +19,7 @@ export function MorphingCard({ title, value, icon, color, children }: MorphingCa
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setGlowIntensity((prev) => 0.3 + Math.sin(Date.now() * 0.003) * 0.2)
+      setGlowIntensity((_prev) => 0.3 + Math.sin(Date.now() * 0.003) * 0.2)
     }, 50)
 
     return () => clearInterval(interval)
