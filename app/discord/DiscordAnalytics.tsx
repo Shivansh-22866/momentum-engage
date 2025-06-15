@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { generateDiscordInsight } from "@/lib/ai/discordInsights"
 import {
   MessageSquare,
   Search,
@@ -59,6 +60,11 @@ export default function DiscordAnalytics() {
   })
   const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [insight, setInsight] = useState<null | {
+  summary: string
+  engagementLevel: string
+  suggestions: string[]
+  }>(null)
 
   const searchParams = useSearchParams()
 
@@ -148,6 +154,12 @@ export default function DiscordAnalytics() {
       handleAnalyzeWithIds(serverParam, channelParam)
     }
   }, [searchParams])
+
+  useEffect(() => {
+  if (messageStats.totalMessages > 0) {
+    generateDiscordInsight(messageStats).then(setInsight).catch(console.error)
+  }
+  }, [messageStats])
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden dark">
@@ -536,6 +548,30 @@ export default function DiscordAnalytics() {
               </motion.div>
             )}
           </AnimatePresence>
+          {insight && (
+  <Card className="bg-black/60 backdrop-blur-md border border-yellow-500/30 shadow-2xl">
+    <CardHeader className="border-b border-yellow-500/20">
+      <CardTitle className="text-lg text-white font-mono">💡 AI COMMUNITY INSIGHTS</CardTitle>
+    </CardHeader>
+    <CardContent className="p-6 text-gray-300 whitespace-pre-line font-mono text-sm space-y-4">
+      <div>
+        <span className="text-green-400 font-bold">Summary:</span> {insight.summary}
+      </div>
+      <div>
+        <span className="text-blue-400 font-bold">Engagement:</span> {insight.engagementLevel}
+      </div>
+      <div>
+        <span className="text-purple-400 font-bold">Suggestions:</span>
+        <ul className="list-disc list-inside text-gray-300">
+          {insight.suggestions.map((tip, i) => (
+            <li key={i}>{tip}</li>
+          ))}
+        </ul>
+      </div>
+    </CardContent>
+  </Card>
+)}
+
         </div>
       </GestureInterface>
     </div>

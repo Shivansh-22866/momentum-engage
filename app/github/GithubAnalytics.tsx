@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Github,
   Search,
@@ -16,82 +16,103 @@ import {
   TrendingUp,
   Calendar,
   Code,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { GitHubMetricsViz } from "@/app/components/GithubMetricsViz"
-import { RepoHealthScore } from "@/app/components/RepoHealthScore"
-import { ParticleSystem } from "@/app/components/ParticleSystem"
-import { GestureInterface } from "@/app/components/GestureInterface"
-import type { GitHubMetrics } from "@/types/agent"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GitHubMetricsViz } from "@/app/components/GithubMetricsViz";
+import { RepoHealthScore } from "@/app/components/RepoHealthScore";
+import { ParticleSystem } from "@/app/components/ParticleSystem";
+import { GestureInterface } from "@/app/components/GestureInterface";
+import { generateGitHubInsight } from "@/lib/ai/githubInsights";
+import type { GitHubMetrics } from "@/types/agent";
 
 export default function GitHubAnalytics() {
-  const [repoUrl, setRepoUrl] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [metrics, setMetrics] = useState<GitHubMetrics | null>(null)
-  const [commitActivity, setCommitActivity] = useState<number[]>([])
-  const [issueActivity, setIssueActivity] = useState({ opened: 0, closed: 0, comments: 0 })
-  const [error, setError] = useState<string | null>(null)
-  const [repoInfo, setRepoInfo] = useState<{ owner: string; repo: string } | null>(null)
+  const [repoUrl, setRepoUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [metrics, setMetrics] = useState<GitHubMetrics | null>(null);
+  const [commitActivity, setCommitActivity] = useState<number[]>([]);
+  const [issueActivity, setIssueActivity] = useState({
+    opened: 0,
+    closed: 0,
+    comments: 0,
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [repoInfo, setRepoInfo] = useState<{
+    owner: string;
+    repo: string;
+  } | null>(null);
+  const [insight, setInsight] = useState<{
+    summary: string;
+    suggestions: string[];
+  }>({
+    summary: "",
+    suggestions: [],
+  });
 
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Get the GitHub URL from search parameters
-    const urlParam = searchParams.get("url")
+    const urlParam = searchParams.get("url");
     if (urlParam) {
-      setRepoUrl(decodeURIComponent(urlParam))
+      setRepoUrl(decodeURIComponent(urlParam));
       // Auto-trigger analysis when URL is provided
-      handleAnalyzeWithUrl(decodeURIComponent(urlParam))
+      handleAnalyzeWithUrl(decodeURIComponent(urlParam));
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleAnalyzeWithUrl = async (url: string) => {
     if (!url.trim()) {
-      setError("Please enter a valid GitHub repository URL")
-      return
+      setError("Please enter a valid GitHub repository URL");
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/github-metrics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ repoUrl: url }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setMetrics(data.metrics)
-        setCommitActivity(data.commitActivity || [])
-        setIssueActivity(data.issueActivity || { opened: 0, closed: 0, comments: 0 })
-        setRepoInfo(data.repoInfo)
+        setMetrics(data.metrics);
+        setCommitActivity(data.commitActivity || []);
+        setIssueActivity(
+          data.issueActivity || { opened: 0, closed: 0, comments: 0 }
+        );
+        setRepoInfo(data.repoInfo);
+        const insight = await generateGitHubInsight(data.metrics);
+        setInsight(insight);
       } else {
-        setError(data.error || "Failed to fetch repository metrics")
+        setError(data.error || "Failed to fetch repository metrics");
       }
     } catch (err) {
-      console.error(err)
-      setError("Failed to analyze repository. Please check the URL and try again.")
+      console.error(err);
+      setError(
+        "Failed to analyze repository. Please check the URL and try again."
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAnalyze = async () => {
-    await handleAnalyzeWithUrl(repoUrl)
-  }
+    await handleAnalyzeWithUrl(repoUrl);
+  };
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
-    if (num >= 1000) return (num / 1000).toFixed(1) + "K"
-    return num.toString()
-  }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toString();
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden dark">
@@ -164,7 +185,8 @@ export default function GitHubAnalytics() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
             >
-              Advanced Repository Intelligence • Real-time Metrics Analysis • Developer Insights
+              Advanced Repository Intelligence • Real-time Metrics Analysis •
+              Developer Insights
             </motion.p>
           </motion.div>
 
@@ -204,7 +226,11 @@ export default function GitHubAnalytics() {
                       <>
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                          transition={{
+                            duration: 1,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "linear",
+                          }}
                         >
                           <Activity className="h-5 w-5 mr-2" />
                         </motion.div>
@@ -224,10 +250,16 @@ export default function GitHubAnalytics() {
 
           {/* Error Display */}
           {error && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mb-8">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8"
+            >
               <Alert className="border-red-500/50 bg-red-500/10 backdrop-blur-md">
                 <AlertCircle className="h-4 w-4 text-red-400" />
-                <AlertDescription className="text-red-300 font-mono">{error}</AlertDescription>
+                <AlertDescription className="text-red-300 font-mono">
+                  {error}
+                </AlertDescription>
               </Alert>
             </motion.div>
           )}
@@ -236,6 +268,7 @@ export default function GitHubAnalytics() {
           <AnimatePresence>
             {metrics && repoInfo && (
               <motion.div
+                key={"results"}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1 }}
@@ -251,10 +284,15 @@ export default function GitHubAnalytics() {
                           <CardTitle className="text-3xl text-white font-mono">
                             {repoInfo.owner}/{repoInfo.repo}
                           </CardTitle>
-                          <p className="text-gray-400 text-lg">Repository Analysis Complete</p>
+                          <p className="text-gray-400 text-lg">
+                            Repository Analysis Complete
+                          </p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="border-green-500/50 text-green-400 bg-green-500/10 px-4 py-2">
+                      <Badge
+                        variant="outline"
+                        className="border-green-500/50 text-green-400 bg-green-500/10 px-4 py-2"
+                      >
                         <Activity className="h-4 w-4 mr-2" />
                         ACTIVE
                       </Badge>
@@ -352,18 +390,32 @@ export default function GitHubAnalytics() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index, duration: 0.5 }}
                       >
-                        <Card className={`bg-black/60 backdrop-blur-md border ${metric.borderColor} shadow-xl`}>
+                        <Card
+                          className={`bg-black/60 backdrop-blur-md border ${metric.borderColor} shadow-xl`}
+                        >
                           <CardContent className="p-6">
-                            <div className={`p-3 rounded-lg bg-gradient-to-br ${metric.bgColor} mb-4`}>
-                              <metric.icon className={`h-6 w-6 ${metric.color}`} />
+                            <div
+                              className={`p-3 rounded-lg bg-gradient-to-br ${metric.bgColor} mb-4`}
+                            >
+                              <metric.icon
+                                className={`h-6 w-6 ${metric.color}`}
+                              />
                             </div>
                             <div className="space-y-2">
-                              <p className="text-sm text-gray-400 uppercase tracking-wider">{metric.label}</p>
+                              <p className="text-sm text-gray-400 uppercase tracking-wider">
+                                {metric.label}
+                              </p>
                               <div className="flex items-baseline space-x-1">
-                                <span className={`text-2xl font-bold ${metric.color} font-mono`}>
+                                <span
+                                  className={`text-2xl font-bold ${metric.color} font-mono`}
+                                >
                                   {formatNumber(metric.value)}
                                 </span>
-                                {metric.suffix && <span className="text-sm text-gray-400">{metric.suffix}</span>}
+                                {metric.suffix && (
+                                  <span className="text-sm text-gray-400">
+                                    {metric.suffix}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </CardContent>
@@ -383,7 +435,10 @@ export default function GitHubAnalytics() {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="h-96">
-                      <GitHubMetricsViz metrics={metrics} commitActivity={commitActivity} />
+                      <GitHubMetricsViz
+                        metrics={metrics}
+                        commitActivity={commitActivity}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -392,21 +447,29 @@ export default function GitHubAnalytics() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <Card className="bg-black/60 backdrop-blur-md border border-blue-500/30 shadow-2xl">
                     <CardHeader className="border-b border-blue-500/20">
-                      <CardTitle className="text-lg text-white font-mono">ISSUE ACTIVITY</CardTitle>
+                      <CardTitle className="text-lg text-white font-mono">
+                        ISSUE ACTIVITY
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Opened (30d)</span>
-                          <span className="text-green-400 font-mono">{issueActivity.opened}</span>
+                          <span className="text-green-400 font-mono">
+                            {issueActivity.opened}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Closed (30d)</span>
-                          <span className="text-blue-400 font-mono">{issueActivity.closed}</span>
+                          <span className="text-blue-400 font-mono">
+                            {issueActivity.closed}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Comments</span>
-                          <span className="text-purple-400 font-mono">{issueActivity.comments}</span>
+                          <span className="text-purple-400 font-mono">
+                            {issueActivity.comments}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
@@ -414,21 +477,31 @@ export default function GitHubAnalytics() {
 
                   <Card className="bg-black/60 backdrop-blur-md border border-green-500/30 shadow-2xl">
                     <CardHeader className="border-b border-green-500/20">
-                      <CardTitle className="text-lg text-white font-mono">DEVELOPMENT ACTIVITY</CardTitle>
+                      <CardTitle className="text-lg text-white font-mono">
+                        DEVELOPMENT ACTIVITY
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Daily Velocity</span>
-                          <span className="text-cyan-400 font-mono">{metrics.velocity.toFixed(2)}</span>
+                          <span className="text-cyan-400 font-mono">
+                            {metrics.velocity.toFixed(2)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Total Commits</span>
-                          <span className="text-green-400 font-mono">{formatNumber(metrics.commits)}</span>
+                          <span className="text-green-400 font-mono">
+                            {formatNumber(metrics.commits)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-400">Active Contributors</span>
-                          <span className="text-purple-400 font-mono">{metrics.contributors}</span>
+                          <span className="text-gray-400">
+                            Active Contributors
+                          </span>
+                          <span className="text-purple-400 font-mono">
+                            {metrics.contributors}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
@@ -436,22 +509,33 @@ export default function GitHubAnalytics() {
 
                   <Card className="bg-black/60 backdrop-blur-md border border-purple-500/30 shadow-2xl">
                     <CardHeader className="border-b border-purple-500/20">
-                      <CardTitle className="text-lg text-white font-mono">COMMUNITY ENGAGEMENT</CardTitle>
+                      <CardTitle className="text-lg text-white font-mono">
+                        COMMUNITY ENGAGEMENT
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Stars</span>
-                          <span className="text-yellow-400 font-mono">{formatNumber(metrics.stars)}</span>
+                          <span className="text-yellow-400 font-mono">
+                            {formatNumber(metrics.stars)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Forks</span>
-                          <span className="text-green-400 font-mono">{formatNumber(metrics.forks)}</span>
+                          <span className="text-green-400 font-mono">
+                            {formatNumber(metrics.forks)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Fork Ratio</span>
                           <span className="text-blue-400 font-mono">
-                            {metrics.stars > 0 ? ((metrics.forks / metrics.stars) * 100).toFixed(1) : 0}%
+                            {metrics.stars > 0
+                              ? ((metrics.forks / metrics.stars) * 100).toFixed(
+                                  1
+                                )
+                              : 0}
+                            %
                           </span>
                         </div>
                       </div>
@@ -460,9 +544,42 @@ export default function GitHubAnalytics() {
                 </div>
               </motion.div>
             )}
+{insight && (
+  <motion.div
+    key="insight-card"
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 50 }}
+  >
+    <Card className="bg-black/60 backdrop-blur-md border border-yellow-500/30 shadow-2xl mt-8">
+      <CardHeader className="border-b border-yellow-500/20">
+        <CardTitle className="text-lg text-white font-mono">💡 AI INSIGHTS</CardTitle>
+      </CardHeader>
+      <CardContent className="p-6 text-gray-300 font-mono space-y-4 text-sm">
+        <div>
+          <p className="text-yellow-400 font-semibold">📌 Summary</p>
+          <p className="whitespace-pre-line">{insight.summary}</p>
+        </div>
+
+
+        <div>
+          <p className="text-yellow-400 font-semibold">📊 Key Signals</p>
+          <ul className="list-disc ml-5 space-y-1">
+            {insight.suggestions.map((signal, i) => (
+              <li key={i}>{signal}</li>
+            ))}
+          </ul>
+        </div>
+
+
+      </CardContent>
+    </Card>
+  </motion.div>
+)}
+
           </AnimatePresence>
         </div>
       </GestureInterface>
     </div>
-  )
+  );
 }

@@ -27,6 +27,8 @@ import { TokenHealthScore } from "@/app/components/TokenHealthScore"
 import { ParticleSystem } from "@/app/components/ParticleSystem"
 import { GestureInterface } from "@/app/components/GestureInterface"
 import type { OnchainMetrics } from "@/types/agent"
+import { generateOnchainInsight } from '@/lib/ai/onchainInsights'
+
 
 interface TokenInfo {
   name: string
@@ -59,6 +61,7 @@ export default function OnchainAnalytics() {
   const [dexMetrics, setDexMetrics] = useState<DEXMetrics | null>(null)
   const [topHolders, setTopHolders] = useState<Array<{ address: string; balance: string; percentage: number }>>([])
   const [error, setError] = useState<string | null>(null)
+  const [insight, setInsight] = useState<Awaited<ReturnType<typeof generateOnchainInsight>> | null>(null)
 
   const searchParams = useSearchParams()
 
@@ -97,6 +100,9 @@ export default function OnchainAnalytics() {
         setHourlyData(data.transactionHistory?.hourly || [])
         setDexMetrics(data.dexMetrics)
         setTopHolders(data.topHolders || [])
+        const aiInsight = await generateOnchainInsight(data.metrics)
+        setInsight(aiInsight)
+
       } else {
         setError(data.error || "Failed to fetch onchain metrics")
       }
@@ -519,6 +525,30 @@ export default function OnchainAnalytics() {
               </motion.div>
             )}
           </AnimatePresence>
+          <div>
+            {insight && (
+  <Card className="bg-black/60 backdrop-blur-md border border-yellow-500/30 shadow-2xl mt-8">
+    <CardHeader className="border-b border-yellow-500/20">
+      <CardTitle className="text-xl text-white font-mono">💡 AI INSIGHTS</CardTitle>
+    </CardHeader>
+    <CardContent className="p-6 text-gray-300 font-mono space-y-4 text-sm">
+      <p><strong>📌 Summary:</strong> {insight.summary}</p>
+      <p><strong>📈 Outlook:</strong> <span className="text-green-400">{insight.outlook}</span></p>
+      <p><strong>⚠️ Risk Level:</strong> <span className="text-red-400">{insight.riskLevel}</span></p>
+      <p><strong>💬 Reason:</strong> {insight.reason}</p>
+      <div>
+        <p className="font-bold mb-1">🔍 Key Signals:</p>
+        <ul className="list-disc list-inside text-gray-400">
+          {insight.keySignals.map((signal, index) => (
+            <li key={index}>{signal}</li>
+          ))}
+        </ul>
+      </div>
+    </CardContent>
+  </Card>
+)}
+
+          </div>
         </div>
       </GestureInterface>
     </div>

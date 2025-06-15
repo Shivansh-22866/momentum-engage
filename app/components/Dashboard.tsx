@@ -18,6 +18,7 @@ import {
   Atom,
   MessageSquare,
   Zap,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -135,6 +136,15 @@ export default function Dashboard() {
     const encodedUrl = encodeURIComponent(projectConfig.githubRepo || "");
     router.push(`/github?url=${encodedUrl}`);
   };
+
+  const handleViewOnchainAnalytics  = () => {
+    const encodedUrl = encodeURIComponent(projectConfig.contractAddress || "");
+    router.push(`/onchain?address=${encodedUrl}`);
+  }
+
+  const handleDiscordAnalytics = () => {
+    router.push(`/discord?server=${projectConfig.discord?.serverId}&channel=${projectConfig.discord?.channelId}`);
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -716,19 +726,14 @@ export default function Dashboard() {
                       icon: <Activity className="h-8 w-8 text-green-400" />,
                       color: "from-green-600 to-emerald-600",
                       content: (
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Transactions</span>
-                            <span className="text-white">1K</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Volume</span>
-                            <span className="text-white">$85K</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Holders</span>
-                            <span className="text-white">480</span>
-                          </div>
+                        <div className="mt-6 pt-6 border-t border-cyan-500/20">
+                          <Button
+                            onClick={handleViewOnchainAnalytics}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-mono"
+                          >
+                            <Coins className="h-5 w-5 mr-2" />
+                            ONCHAIN ANALYTICS
+                          </Button>
                         </div>
                       ),
                     },
@@ -738,19 +743,14 @@ export default function Dashboard() {
                       icon: <Users className="h-8 w-8 text-purple-400" />,
                       color: "from-purple-600 to-pink-600",
                       content: (
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Discord</span>
-                            <span className="text-white">2 msgs</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Reddit</span>
-                            <span className="text-white">0 posts</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Medium</span>
-                            <span className="text-white">0 posts</span>
-                          </div>
+                        <div className="mt-6 pt-6 border-t border-cyan-500/20">
+                          <Button
+                            onClick={handleDiscordAnalytics}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-mono"
+                          >
+                            <MessageSquare className="h-5 w-5 mr-2" />
+                            DISCORD ANALYTICS
+                          </Button>
                         </div>
                       ),
                     },
