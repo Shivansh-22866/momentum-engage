@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
+import { motion, AnimatePresence, useMotionValue, useAnimationFrame } from "framer-motion"
 
 interface MorphingCardProps {
   title: string
@@ -15,15 +14,15 @@ interface MorphingCardProps {
 
 export function MorphingCard({ title, value, icon, color, children }: MorphingCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [glowIntensity, setGlowIntensity] = useState(0.3)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGlowIntensity((_prev) => 0.3 + Math.sin(Date.now() * 0.003) * 0.2)
-    }, 50)
+  // Use Framer Motion's motion value instead of React state
+  const glow = useMotionValue(0.3)
 
-    return () => clearInterval(interval)
-  }, [])
+  // Update glow value on every animation frame
+  useAnimationFrame(() => {
+    const intensity = 0.3 + Math.sin(Date.now() * 0.003) * 0.2
+    glow.set(intensity)
+  })
 
   return (
     <motion.div
@@ -34,8 +33,8 @@ export function MorphingCard({ title, value, icon, color, children }: MorphingCa
     >
       <motion.div
         className={`absolute inset-0 bg-gradient-to-br ${color} rounded-xl blur-lg`}
+        style={{ opacity: glow }} // Use motion value for opacity
         animate={{
-          opacity: glowIntensity,
           scale: isExpanded ? 1.1 : 1,
         }}
         transition={{ duration: 0.3 }}

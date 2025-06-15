@@ -36,8 +36,10 @@ import type {
 } from "@/types/agent";
 import { MomentumTimeSeries } from "./MomentumTimeSeries";
 import { AIInsightsDisplay } from "./AIInsightsDisplay";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<MomentumScore | null>(null);
   const [alerts, setAlerts] = useState<AlertType[]>([]);
@@ -97,7 +99,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      setAiProcessing(true)
+      setAiProcessing(true);
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,7 +114,7 @@ export default function Dashboard() {
       const json = await res.json();
       if (json.status === "ok") {
         console.log(json);
-        setAiProcessing(false)
+        setAiProcessing(false);
         setBreakDown(json.breakdown);
         setScore(json.score);
         setAlerts(json.alerts);
@@ -127,6 +129,11 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewGitHubAnalytics = () => {
+    const encodedUrl = encodeURIComponent(projectConfig.githubRepo || "");
+    router.push(`/github?url=${encodedUrl}`);
   };
 
   return (
@@ -670,19 +677,14 @@ export default function Dashboard() {
                       icon: <Github className="h-8 w-8 text-gray-300" />,
                       color: "from-gray-600 to-gray-800",
                       content: (
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Stars</span>
-                            <span className="text-white">42.8K</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Commits</span>
-                            <span className="text-white">100</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Velocity</span>
-                            <span className="text-white">3.3/day</span>
-                          </div>
+                        <div className="mt-6 pt-6 border-t border-cyan-500/20">
+                          <Button
+                            onClick={handleViewGitHubAnalytics}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-mono"
+                          >
+                            <Github className="h-5 w-5 mr-2" />
+                            GITHUB ANALYTICS
+                          </Button>
                         </div>
                       ),
                     },

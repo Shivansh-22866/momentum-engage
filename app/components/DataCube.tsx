@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 interface DataCubeProps {
   data: {
@@ -14,7 +14,7 @@ interface DataCubeProps {
 export function HolographicDataCube({ data }: DataCubeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>(0)
-  const [rotation, setRotation] = useState({ x: 0, y: 0 })
+  const rotationRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -33,7 +33,6 @@ export function HolographicDataCube({ data }: DataCubeProps) {
     const drawCube = (rotX: number, rotY: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Define cube vertices
       const vertices = [
         [-size, -size, -size],
         [size, -size, -size],
@@ -45,36 +44,29 @@ export function HolographicDataCube({ data }: DataCubeProps) {
         [-size, size, size],
       ]
 
-      // Rotate vertices
       const rotatedVertices = vertices.map(([x, y, z]) => {
-        // Rotate around X axis
         const y1 = y * Math.cos(rotX) - z * Math.sin(rotX)
         const z1 = y * Math.sin(rotX) + z * Math.cos(rotX)
-
-        // Rotate around Y axis
         const x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY)
         const z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY)
-
         return [x2, y1, z2]
       })
 
-      // Project to 2D
       const projectedVertices = rotatedVertices.map(([x, y]) => [centerX + x, centerY + y])
 
-      // Draw cube edges with glow effect
       const edges = [
         [0, 1],
         [1, 2],
         [2, 3],
-        [3, 0], // back face
+        [3, 0],
         [4, 5],
         [5, 6],
         [6, 7],
-        [7, 4], // front face
+        [7, 4],
         [0, 4],
         [1, 5],
         [2, 6],
-        [3, 7], // connecting edges
+        [3, 7],
       ]
 
       ctx.strokeStyle = "#00ffff"
@@ -92,7 +84,6 @@ export function HolographicDataCube({ data }: DataCubeProps) {
         ctx.stroke()
       })
 
-      // Draw data bars inside cube
       const dataValues = [data.github, data.social, data.onchain, data.community]
       const colors = ["#00ffff", "#8b5cf6", "#10b981", "#f59e0b"]
       const labels = ["GitHub", "Social", "Onchain", "Community"]
@@ -103,13 +94,11 @@ export function HolographicDataCube({ data }: DataCubeProps) {
         const x = centerX + Math.cos(angle) * 60
         const y = centerY + Math.sin(angle) * 30
 
-        // Draw data bar
         ctx.fillStyle = colors[index]
         ctx.shadowBlur = 15
         ctx.shadowColor = colors[index]
         ctx.fillRect(x - 5, y - barHeight / 2, 10, barHeight)
 
-        // Draw label
         ctx.fillStyle = colors[index]
         ctx.font = "12px monospace"
         ctx.textAlign = "center"
@@ -119,23 +108,23 @@ export function HolographicDataCube({ data }: DataCubeProps) {
     }
 
     const animate = () => {
-      setRotation((prev) => ({
-        x: prev.x + 0.01,
-        y: prev.y + 0.015,
-      }))
+      // Update rotationRef directly
+      rotationRef.current.x += 0.01
+      rotationRef.current.y += 0.015
 
-      drawCube(rotation.x, rotation.y)
+      const { x, y } = rotationRef.current
+      drawCube(x, y)
+
       animationRef.current = requestAnimationFrame(animate)
     }
 
     animate()
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
-  }, [data, rotation])
+  }, [data]) // ✅ No rotation in deps
+  
 
   return (
     <div className="relative">
